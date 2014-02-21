@@ -1,0 +1,9 @@
+{
+     "name": "multiplayershell",
+     "description": "Multiplayer shell",
+     "version": "1.0.0",
+     "dependencies": {
+        "express": "3.0.0",
+        "socket.io": "0.8.3"
+     }
+}

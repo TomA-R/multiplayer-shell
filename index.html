@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+	<script>
+		var socket = io.connect();
+
+		socket.on('connect', function () {
+			$('.chat-options').delay(500).slideDown(1000, function () {
+				$('#connecting').slideUp(1000);
+				$('#username').focus();
+			});
+
+			$('#submit-username').click(function () {
+				socket.emit('adduser', $('#username').val());
+				$('.chat-options').slideUp();
+				$('#terminal-wrapper').slideDown();
+				$('#command').focus();
+			});
+
+			$('#username').keypress(function (e) {
+				if (e.which == 13) {
+					$(this).blur();
+					$('#submit-username').focus().click();
+				}
+			});
+		});
+
+		socket.on('sendCommand', function (username, data) {
+			var message = '<b>' + username + ':</b> ' + data + '<br>';
+			$('#terminal').append(message);
+		});
+
+		socket.on('systemMsg', function (data) {console.log(data);
+			var message = '<span class="chat-notification"><b>' + data + '</span><br>';
+			$('#terminal').append(message);
+		});
+
+		socket.on('updateusers', function (data) {
+			$('#users').empty();
+			$.each(data, function (key, value) {
+				$('#users').append('<div>' + key + '</div>');
+			});
+		});
+
+		$(function () {
+			$('#sendCommand').click(function () {
+				var message = $('#command').val();
+				$('#command').val('').focus();
+				socket.emit('sendCommand', message);
+			});
+
+			$('#command').keypress(function (e) {
+				if (e.which == 13) {
+					$(this).blur();
+					$('#sendCommand').focus().click();
+				}
+			});
+		});
+	</script>
+	<style>
+		body {
+			font-family: "Cambria", Times, serif;
+		}
+		#connecting {
+			color: #cc0000;
+		}
+
+		#terminal-wrapper {
+			display: none;
+		}
+
+		#users-list {
+			float: left;
+			width: 100px;
+			min-height: 100px;
+			padding: 10px;
+			background-color: #f3f0ca;
+			box-shadow: 3px 3px 5px #e9e9e9;
+		}
+
+		#main {
+			float: left;
+			width: 600px;
+			min-height: 100px;
+			padding: 10px;
+			margin-left: 20px;
+		}
+
+		.chat-notification {
+			color: #158052;
+		}
+
+		.chat-options {
+			display: none;
+		}
+
+		#terminal {
+			background-color: #fff7ec;
+			font-family: courier, monospace;
+			padding: 10px;
+			margin-bottom: 20px;
+		}
+	</style>
+</head>
+<body>
+<div id="users-list">
+	<b>Users</b>
+	<div id="users"></div>
+</div>
+<div id="main">
+	<div id="connecting">
+		Connecting to node.js..
+	</div>
+	<div class="chat-options">
+		Connected to NodeJS server! Please enter your username
+		<div>
+			<input id="username"/>
+			<input type="button" id="submit-username" value="Kies"/>
+		</div>
+	</div>
+
+	<div id="terminal-wrapper">
+		<div id="terminal"></div>
+		Command: <input id="command"/>
+		<input type="button" id="sendCommand" value="Send!"/>
+	</div>
+</div>
+</body>
+</html>
